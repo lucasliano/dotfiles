@@ -47,6 +47,7 @@ my_browser = 'firefox' #"brave-browser"
 my_file_manager = "nautilus"
 my_markdown = "obsidian"
 my_ide = "code"
+my_chat = 'discord'
 
 mouse = [
     Drag("M-1",
@@ -182,8 +183,9 @@ keys = [
     Key("M-c",
         lazy.spawn(my_ide),
         desc="Launch " + my_ide),
-
-
+    Key("M-d",
+        lazy.spawn(my_chat),
+        desc="Launch " + my_chat),
 ]
 
 groups = [
