@@ -421,7 +421,7 @@ def status_bar(widget_list):
   return bar.Bar(widget_list, 20, opacity=0.85)
 
 def random_wallpaper():
-    return '/home/lucas/Pictures/wallpapers/'+'house.png' #'pixel_art.png'
+    return '/home/lucas/Pictures/wallpapers/'+'gruvbox_style.png'#'house.png' #'pixel_art.png'
 
 
 
