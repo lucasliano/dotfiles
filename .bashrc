@@ -1,11 +1,13 @@
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
 # for examples
-
+PATH="/home/lucas/Desktop/Imagen_BBB/gcc-linaro-7.5.0-2019.12-i686-mingw32_arm-linux-gnueabihf/bin:$PATH"
 PATH="$HOME/.local/bin:$PATH"
 PATH="$HOME/.cargo/bin:$PATH"
 alias nvim=nvim.appimage
 alias vim=nvim
+neofetch
+
 
 # If not running interactively, don't do anything
 case $- in

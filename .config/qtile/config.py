@@ -69,13 +69,16 @@ keys = [
         lazy.shutdown(),
         desc="Quit Qtile"),
     Key("M-<Space>",
-        lazy.spawn("physlock"),
+        lazy.spawn("systemctl suspend"),
         desc="Bloquea la pantalla"),
     Key("M-p",
         lazy.widget["keyboardlayout"].next_keyboard(),
         desc="Cambia el teclado entre US y LATAM"),
 
     # Layout
+    Key("M-q", 
+        lazy.next_screen(),
+        desc="Next Screen"),
     Key("M-S-j",
         lazy.layout.shuffle_up(),
         desc="Swap with previous window"),
@@ -148,16 +151,6 @@ keys = [
          lazy.spawn("brightnessctl set 10%+"),
          desc="Increase the brightness"),
 
-
-
-    # # TODO: Cambiar esto!
-    # Key("A-j",
-    #     lazy.spawn("brightnessctl set 10%-"),
-    #     desc="Decrease the brightness"),
-    # Key("A-k",
-    #     lazy.spawn("brightnessctl set 10%+"),
-    #     desc="Increase the brightness"),
-
     # Apps
     Key("M-r",
         lazy.spawn("rofi -show drun"),
@@ -226,11 +219,11 @@ for k, group in zip(["1", "2", "3", "4", "5", "6"], groups):
 colours = [
     ["#1f2329", "#1f2329"],  # Background
     ["#dcdcdc", "#dcdcdc"],  # Foreground
-    ["#535965", "#535965"],  # Grey Colour
+    ["#535965", "#535965"],  # Not Focused (Grey)
     ["#e55561", "#e55561"],
     ["#8ebd6b", "#8ebd6b"],
     ["#e2b86b", "#e2b86b"],
-    ["#4fa6ed", "#4fa6ed"],
+    ["#4fa6ed", "#4fa6ed"],  # Focused (Lightblue)
     ["#bf68d9", "#bf68d9"],
     ["#48b0bd", "#48b0bd"],
 ]
@@ -257,7 +250,7 @@ layouts = [
     layout.Max(**layout_theme),
     layout.MonadTall(**layout_theme),
     layout.Matrix(**layout_theme),
-    # layout.MonadWide(**layout_theme),
+    layout.MonadWide(**layout_theme),
     # layout.Stack(num_stacks=2),
 ]
 
@@ -292,16 +285,27 @@ widgets = [
         linewidth=1,
         padding=10),
     widget.GroupBox(
-        active=colours[4],
-        inactive=colours[6],
-        other_current_screen_border=colours[5],
-        other_screen_border=colours[2],
-        this_current_screen_border=colours[7],
-        this_screen_border=colours[2],
+        active=colours[4],      # Green
+        inactive=colours[6],    # Blue
+
+        highlight_method="line",
+        highlight_color = ['2d2d2d', '282828'],
+        borderwidth = 1,
+
+        # In use screen
+        this_current_screen_border=colours[7],  # Purple
+        this_screen_border=colours[7],          # Purple
+
+        # 2nd screens
+        other_current_screen_border=colours[3], # Gray
+        other_screen_border=colours[3], # Gray
+        # other_current_screen_border="#ffa500", #RED
+        # other_screen_border="#ffa500",  # ORANGE
+       
+
         urgent_border=colours[3],
         urgent_text=colours[3],
         disable_drag=True,
-        highlight_method="text",
         invert_mouse_wheel=True,
         margin=2,
         padding=0,
@@ -417,6 +421,77 @@ widgets = [
         padding=4),
 ]
 
+
+reduced_widgets = [
+    widget.Sep(
+        foreground=colours[0],
+        linewidth=4),
+    widget.Image(
+        filename="~/.config/qtile/py.png",
+        mouse_callbacks=({
+            "Button1": lambda: qtile.cmd_spawn("rofi -show drun"),
+            "Button3": lambda: qtile.cmd_spawn("rofi -show run"),
+        }),
+        scale=True),
+    widget.KeyboardLayout(
+        configured_keyboards=['latam','us'],
+        foreground=colours[6],
+        fontsize=10,),
+
+    widget.Sep(
+        foreground=colours[2],
+        linewidth=1,
+        padding=10),
+    widget.GroupBox(
+        active=colours[4],      # Green
+        inactive=colours[6],    # Blue
+
+        highlight_method="line",
+        highlight_color = ['2d2d2d', '282828'],
+        borderwidth = 3,
+
+        # In use screen
+        this_current_screen_border=colours[3],  # Purple
+        this_screen_border=colours[3],          # Purple
+
+        # 2nd screens
+        other_current_screen_border=colours[7], # Gray
+        other_screen_border=colours[7], # Gray       
+
+        urgent_border=colours[3],
+        urgent_text=colours[3],
+        disable_drag=True,
+        invert_mouse_wheel=True,
+        margin=2,
+        padding=0,
+        rounded=True,
+        urgent_alert_method="text"),
+    widget.Sep(
+        foreground=colours[2],
+        linewidth=1,
+        padding=10),
+    widget.CurrentLayout(
+        foreground=colours[7],
+        font="Roboto Nerd Font Bold"),
+
+    widget.Cmus(
+        noplay_color=colours[2],
+        play_color=colours[1]),
+    widget.Sep(
+        foreground=colours[2],
+        linewidth=1,
+        padding=10),
+    widget.WindowName(
+        max_chars=75),
+    widget.Sep(
+        foreground=colours[2],
+        linewidth=1,
+        padding=10),
+    widget.Clock(
+        foreground=colours[8],
+        format="📅 %a %b %d  %I:%M %P")
+]
+
 def status_bar(widget_list):
   return bar.Bar(widget_list, 20, opacity=0.85)
 
@@ -425,39 +500,47 @@ def random_wallpaper():
 
 
 
-screens = [
-    # Monitor Notebook
-    Screen(
-        top=status_bar(widgets),
-        wallpaper=random_wallpaper(),
-        wallpaper_mode="stretch"
-    ),
+# How to solve monitor being duplicated?:
+# xrandr --output HDMI-1-0 --mode 1920x1080 --noprimary --left-of eDP-1
 
-    # Segundo monitor
+
+# How I'm setting up the dual monitor thing:
+# I want the big monitor to have the widgets, but if i only have the 
+# notebook connected, then that monitor should have them
+screens = [
+    # Primary Monitor (eDP-1 Notebook)
     Screen(
         top=status_bar(widgets),
-        wallpaper=random_wallpaper(),
-        wallpaper_mode="stretch"
+        wallpaper='/home/lucas/Pictures/wallpapers/'+'gruvbox_style.png',
+        wallpaper_mode="stretch",
     ),
 ]
 
-# connected_monitors = (subprocess.run(
-#     "xrandr | busybox grep 'connected' | busybox cut -d' ' -f2",
-#     check=True,
-#     shell=True,
-#     stdout=subprocess.PIPE,
-# ).stdout.decode("UTF-8").split("\n")[:-1].count("connected"))
+# Now we check if we have more than one monitor.
+connected_monitors = (subprocess.run(
+    "xrandr | busybox grep 'connected' | busybox cut -d' ' -f2",
+    check=True,
+    shell=True,
+    stdout=subprocess.PIPE,
+).stdout.decode("UTF-8").split("\n")[:-1].count("connected"))
 
-# if connected_monitors > 1:
-#   for i in range(1, connected_monitors):
-#     screens.append(
-#         Screen(
-#             top=status_bar(widgets),
-#             wallpaper=
-#                 random_wallpaper(),
-#             wallpaper_mode="stretch"
-#         )
-#     )
+# In which case, we rearrenge the screens list
+if connected_monitors == 2:
+    screens = [
+        # Primary Monitor (eDP-1 Notebook)
+        Screen(
+            top=status_bar(reduced_widgets),
+            wallpaper='/home/lucas/Pictures/wallpapers/'+'house.png',
+            wallpaper_mode="stretch",
+        ),
+
+        # Secondary Monitor (HDMI-1-0)
+        Screen(
+            top=status_bar(widgets),
+            wallpaper='/home/lucas/Pictures/wallpapers/'+'gruvbox_style.png',
+            wallpaper_mode="stretch",
+        ),
+    ]
 
 auto_fullscreen = True
 auto_minimize = True
